@@ -1,14 +1,20 @@
-// Git Simulator Service Worker v1.0
-const CACHE_NAME = 'git-simulator-v1';
+// Git Simulator Service Worker v2.0
+const CACHE_NAME = 'git-simulator-v2';
+const BASE = '/git-simulator';
 const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon-192x192.png',
-  './icons/icon-512x512.png',
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/manifest.json',
+  BASE + '/icons/icon-72x72.png',
+  BASE + '/icons/icon-96x96.png',
+  BASE + '/icons/icon-128x128.png',
+  BASE + '/icons/icon-144x144.png',
+  BASE + '/icons/icon-152x152.png',
+  BASE + '/icons/icon-192x192.png',
+  BASE + '/icons/icon-384x384.png',
+  BASE + '/icons/icon-512x512.png',
 ];
 
-// Install: cache all assets
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
@@ -16,7 +22,6 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -26,7 +31,6 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: cache-first strategy
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
@@ -37,7 +41,7 @@ self.addEventListener('fetch', e => {
         const copy = res.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, copy));
         return res;
-      }).catch(() => caches.match('./index.html'));
+      }).catch(() => caches.match(BASE + '/index.html'));
     })
   );
 });
