@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="GitSim">
 <link rel="manifest" href="/git-simulator/manifest.json">
 <link rel="apple-touch-icon" href="/git-simulator/icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/git-simulator/icons/icon-512x512.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/git-simulator/icons/icon-192x192.png">
 <style id="embedded-fonts">
 @font-face {
@@ -1850,11 +1851,11 @@ document.getElementById('installBtn')?.addEventListener('click', async()=>{
 });
 window.addEventListener('appinstalled',()=>toast('Git Simulator installed successfully!','success'));
 
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/git-simulator/sw.js', { scope: '/git-simulator/' }).then(reg=>{
-      console.log('SW registered, scope:', reg.scope);
-    }).catch(e=>console.warn('SW failed:',e));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/git-simulator/sw.js', {scope: '/git-simulator/'})
+      .then(r => console.log('SW ok, scope:', r.scope))
+      .catch(e => console.warn('SW error:', e));
   });
 }
 
