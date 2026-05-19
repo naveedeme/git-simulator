@@ -1,4 +1,4 @@
-const CACHE = 'gitsim-v4';
+const CACHE = 'gitsim-v5';
 const BASE  = new URL('./', self.location).pathname.replace(/\/$/, '');
 
 self.addEventListener('install', e => {
@@ -7,10 +7,15 @@ self.addEventListener('install', e => {
     caches.open(CACHE).then(c => c.addAll([
       BASE + '/index.html',
       BASE + '/manifest.json',
+      BASE + '/favicon.ico',
+      BASE + '/icon-72x72.png',
+      BASE + '/icon-96x96.png',
+      BASE + '/icon-128x128.png',
+      BASE + '/icon-144x144.png',
+      BASE + '/icon-152x152.png',
       BASE + '/icon-192x192.png',
-      BASE + '/icon-192x192-maskable.png',
+      BASE + '/icon-384x384.png',
       BASE + '/icon-512x512.png',
-      BASE + '/icon-512x512-maskable.png',
     ]))
   );
 });

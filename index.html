@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Git Simulator — Interactive Git Practice</title>
+<title>Git Simulator - Interactive Git Practice</title>
 <meta name="description" content="Practice Git commands interactively. Old & new syntax, branching, merging, rebasing. Fully offline PWA.">
 <meta name="theme-color" content="#ff6b00">
 <meta name="mobile-web-app-capable" content="yes">
@@ -11,6 +11,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GitSim">
 <link rel="manifest" href="manifest.json">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="icon-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
@@ -213,6 +215,37 @@ nav button.active { color: var(--orange); background: rgba(255,107,0,.1); }
   display: flex; align-items: center; gap: 8px;
   padding: 10px 18px; border-top: 1px solid var(--border);
   background: var(--bg3);
+}
+.term-predictions {
+  display: flex; gap: 8px; align-items: stretch;
+  padding: 8px 18px; border-top: 1px solid var(--border);
+  background: rgba(22,27,34,.96);
+  overflow-x: auto;
+}
+.term-predictions[hidden] { display: none; }
+.term-prediction {
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 140px; max-width: 250px; padding: 7px 9px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); color: var(--text);
+  font-family: var(--mono); text-align: left; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.term-prediction:hover,
+.term-prediction.active {
+  border-color: var(--orange); background: rgba(255,107,0,.08);
+}
+.term-prediction-kind {
+  color: var(--orange2); font-size: .66rem; text-transform: uppercase;
+  letter-spacing: .04em; font-family: var(--sans); font-weight: 700;
+}
+.term-prediction-main {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: .78rem;
+}
+.term-prediction-detail {
+  color: var(--text3); font-size: .68rem; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; font-family: var(--sans);
 }
 .term-prompt-label {
   font-family: var(--mono); font-size: .82rem;
@@ -633,6 +666,7 @@ nav button.active { color: var(--orange); background: rgba(255,107,0,.1); }
             <div class="term-title">git-simulator — bash</div>
           </div>
           <div class="term-output" id="termOutput"></div>
+          <div class="term-predictions" id="termPredictions" hidden></div>
           <div class="term-input-row">
             <div class="term-prompt-label"><span class="cwd" id="promptCwd">~/my-project</span> <span class="branch" id="promptBranch">(main)</span> $</div>
             <input class="term-input" id="termInput" placeholder="type a git command…" autocomplete="off" spellcheck="false">
@@ -746,6 +780,8 @@ const S = {
   detachedHEAD: false,
   history: [],        // command history
   histIdx: -1,
+  predictions: [],    // terminal command/word suggestions
+  predictionIdx: 0,
   remoteUrl: 'https://github.com/user/my-project.git',
 };
 function sha(n){ return Math.random().toString(16).slice(2,9); }
@@ -1452,17 +1488,162 @@ function showCommandHelp(cmd){
   addLine(helps[cmd]||`No specific help for '${cmd}'. Try: git ${cmd} --help`,'info');
 }
 
-// ── INPUT ──
+// ── INPUT + PREDICTIONS ──
 const inp = ()=>document.getElementById('termInput');
+const predictionPanel = ()=>document.getElementById('termPredictions');
+
+const SHELL_WORDS = [
+  ['git','command','Run a Git command'],
+  ['help','command','Show simulator help'],
+  ['clear','command','Clear terminal output'],
+  ['ls','command','List files'],
+  ['pwd','command','Print current directory'],
+  ['touch','command','Create a file'],
+  ['echo','command','Write text or print output'],
+  ['cat','command','Print a file'],
+  ['cd','command','Change simulated folder'],
+  ['mkdir','command','Create a folder'],
+];
+const GIT_SUBCOMMAND_WORDS = [
+  ['init','subcommand','Create a repository'],
+  ['status','subcommand','Show working tree status'],
+  ['add','subcommand','Stage changes'],
+  ['commit','subcommand','Record a snapshot'],
+  ['log','subcommand','Show commit history'],
+  ['diff','subcommand','Show changes'],
+  ['branch','subcommand','List or manage branches'],
+  ['switch','subcommand','Switch branches'],
+  ['checkout','subcommand','Classic switch/restore command'],
+  ['merge','subcommand','Join histories'],
+  ['rebase','subcommand','Replay commits'],
+  ['reset','subcommand','Move HEAD or unstage'],
+  ['restore','subcommand','Restore files'],
+  ['stash','subcommand','Save dirty work'],
+  ['tag','subcommand','Manage tags'],
+  ['remote','subcommand','Manage remotes'],
+  ['fetch','subcommand','Download from a remote'],
+  ['pull','subcommand','Fetch and merge'],
+  ['push','subcommand','Upload commits'],
+  ['clone','subcommand','Clone a repo'],
+  ['cherry-pick','subcommand','Apply a commit'],
+  ['bisect','subcommand','Find a bad commit'],
+  ['reflog','subcommand','Show HEAD history'],
+  ['show','subcommand','Show an object'],
+  ['blame','subcommand','Annotate file lines'],
+  ['shortlog','subcommand','Summarize authors'],
+  ['describe','subcommand','Describe using tags'],
+  ['archive','subcommand','Create an archive'],
+  ['worktree','subcommand','Use multiple worktrees'],
+  ['sparse-checkout','subcommand','Partial checkout'],
+  ['maintenance','subcommand','Repo maintenance'],
+  ['fsck','subcommand','Verify objects'],
+  ['gc','subcommand','Clean up objects'],
+  ['config','subcommand','Read or write config'],
+  ['help','subcommand','Show Git help'],
+  ['version','subcommand','Show Git version'],
+  ['rev-parse','subcommand','Parse revisions'],
+  ['rev-list','subcommand','List commits'],
+];
+const GIT_OPTION_WORDS = {
+  add: [['.','path','Stage all files'], ['-A','option','Stage all changes'], ['--all','option','Stage all changes']],
+  commit: [['-m','option','Commit message'], ['--amend','option','Amend last commit'], ['--allow-empty','option','Allow an empty commit'], ['--fixup','option','Create a fixup commit']],
+  log: [['--oneline','option','Compact output'], ['--graph','option','Draw graph'], ['--all','option','Show all branches'], ['--format=','option','Custom format'], ['--since=','option','Filter by date']],
+  diff: [['--staged','option','Show staged changes'], ['--cached','option','Classic staged alias']],
+  branch: [['-d','option','Delete branch'], ['-D','option','Force delete branch'], ['-m','option','Rename branch'], ['-a','option','List all branches'], ['-r','option','List remote branches'], ['--sort=','option','Sort branches']],
+  switch: [['-c','option','Create and switch'], ['-C','option','Create/reset and switch'], ['--detach','option','Detach HEAD'], ['--orphan','option','Create orphan branch']],
+  checkout: [['-b','option','Create and switch'], ['-B','option','Create/reset and switch'], ['--','option','Restore file path']],
+  merge: [['--no-ff','option','Always make merge commit'], ['--ff-only','option','Only fast-forward'], ['--squash','option','Squash merge']],
+  rebase: [['-i','option','Interactive rebase'], ['--onto','option','Transplant commits'], ['--continue','option','Continue rebase'], ['--abort','option','Abort rebase']],
+  reset: [['--soft','option','Keep index and worktree'], ['--mixed','option','Unstage changes'], ['--hard','option','Discard changes']],
+  restore: [['--staged','option','Unstage paths'], ['--source=','option','Restore from source'], ['--worktree','option','Restore worktree']],
+  stash: [['push','word','Create a stash'], ['pop','word','Apply and drop top stash'], ['apply','word','Apply a stash'], ['list','word','List stashes'], ['drop','word','Drop a stash'], ['show','word','Show stash diff'], ['clear','word','Clear stashes'], ['-m','option','Add message']],
+  tag: [['-a','option','Create annotated tag'], ['-d','option','Delete tag'], ['-m','option','Tag message']],
+  remote: [['add','word','Add remote'], ['remove','word','Remove remote'], ['rm','word','Remove remote'], ['set-url','word','Set URL'], ['show','word','Show remote'], ['-v','option','Verbose remotes']],
+  push: [['-u','option','Set upstream'], ['--force-with-lease','option','Safer force push'], ['--delete','option','Delete remote branch'], ['origin','remote','Default remote']],
+  pull: [['--rebase','option','Rebase after fetch'], ['--ff-only','option','Only fast-forward'], ['origin','remote','Default remote']],
+  fetch: [['--all','option','Fetch all remotes'], ['--prune','option','Prune deleted refs'], ['origin','remote','Default remote']],
+  config: [['--global','option','Global config'], ['--list','option','List config'], ['-l','option','List config'], ['user.name','key','User name'], ['user.email','key','User email'], ['init.defaultBranch','key','Default branch']],
+  worktree: [['add','word','Add a worktree'], ['list','word','List worktrees'], ['remove','word','Remove a worktree']],
+  bisect: [['start','word','Start bisect'], ['good','word','Mark good'], ['bad','word','Mark bad'], ['reset','word','End bisect'], ['skip','word','Skip commit']],
+  'sparse-checkout': [['init','word','Enable sparse checkout'], ['set','word','Set sparse paths'], ['list','word','List sparse paths'], ['--cone','option','Cone mode']],
+  maintenance: [['start','word','Start maintenance'], ['stop','word','Stop maintenance'], ['run','word','Run maintenance now']],
+};
+const COMMAND_TEMPLATES = [
+  ['git init','Create a new repository'],
+  ['git status','Check repo state'],
+  ['git add .','Stage all files'],
+  ['git commit -m "first commit"','Commit staged changes'],
+  ['git log','Show commit history'],
+  ['git log --oneline','Compact history'],
+  ['git log --graph --oneline --all','Graph all branches'],
+  ['git branch','List branches'],
+  ['git switch main','Switch to main'],
+  ['git switch -c feature','Create feature branch'],
+  ['git checkout -b feature','Classic create branch'],
+  ['git merge feature','Merge feature branch'],
+  ['git rebase main','Rebase on main'],
+  ['git reset --soft HEAD~1','Undo commit, keep staged'],
+  ['git restore --staged README.md','Unstage a file'],
+  ['git stash','Stash current work'],
+  ['git stash push -m "wip"','Stash with message'],
+  ['git stash pop','Restore latest stash'],
+  ['git tag v1.0.0','Create a tag'],
+  ['git remote -v','Show remotes'],
+  ['git remote add origin https://github.com/user/my-project.git','Add origin remote'],
+  ['git fetch','Fetch from remote'],
+  ['git pull','Pull from remote'],
+  ['git push -u origin main','Push and set upstream'],
+  ['git diff','Show unstaged diff'],
+  ['git diff --staged','Show staged diff'],
+  ['git show HEAD','Show HEAD commit'],
+  ['git reflog','Show HEAD movement'],
+  ['git config --list','List Git config'],
+  ['touch README.md','Create README.md'],
+  ['echo "hello" > README.md','Write README.md'],
+  ['ls','List files'],
+  ['pwd','Show current path'],
+  ['help','Show help'],
+  ['clear','Clear terminal'],
+];
+
 document.addEventListener('DOMContentLoaded', ()=>{
   const i = inp();
   if(!i) return;
   i.addEventListener('keydown', e=>{
-    if(e.key==='Enter'){ const v=i.value; i.value=''; processCmd(v); }
-    if(e.key==='ArrowUp'){ e.preventDefault(); S.histIdx=Math.min(S.histIdx+1,S.history.length-1); i.value=S.history[S.histIdx]||''; }
-    if(e.key==='ArrowDown'){ e.preventDefault(); S.histIdx=Math.max(S.histIdx-1,-1); i.value=S.histIdx<0?'':S.history[S.histIdx]; }
-    if(e.key==='Tab'){ e.preventDefault(); autoComplete(i); }
+    if(e.key==='Enter'){
+      const v=i.value;
+      i.value='';
+      hidePredictions();
+      processCmd(v);
+      return;
+    }
+    if(e.key==='ArrowUp'){
+      e.preventDefault();
+      S.histIdx=Math.min(S.histIdx+1,S.history.length-1);
+      i.value=S.history[S.histIdx]||'';
+      setInputCursorToEnd(i);
+      updateTermPredictions();
+      return;
+    }
+    if(e.key==='ArrowDown'){
+      e.preventDefault();
+      S.histIdx=Math.max(S.histIdx-1,-1);
+      i.value=S.histIdx<0?'':S.history[S.histIdx];
+      setInputCursorToEnd(i);
+      updateTermPredictions();
+      return;
+    }
+    if(e.key==='Tab'){
+      e.preventDefault();
+      autoComplete(i);
+      return;
+    }
+    if(e.key==='Escape') hidePredictions();
   });
+  i.addEventListener('input', updateTermPredictions);
+  i.addEventListener('focus', updateTermPredictions);
+  i.addEventListener('click', updateTermPredictions);
+  i.addEventListener('blur', ()=>setTimeout(hidePredictions, 120));
   initWelcome();
   initCheatSheet();
   initScenarios();
@@ -1474,14 +1655,222 @@ document.addEventListener('DOMContentLoaded', ()=>{
   refreshGraph();
 });
 
-function autoComplete(i){
-  const val = i.value;
-  const gitCmds=['git init','git add','git commit -m "','git status','git log','git log --oneline','git log --graph --oneline --all','git branch','git switch','git checkout','git merge','git rebase','git reset','git restore','git stash','git tag','git remote','git push','git pull','git fetch','git cherry-pick','git diff','git show','git reflog','git config','git worktree','git bisect','git blame'];
-  const match = gitCmds.filter(c=>c.startsWith(val));
-  if(match.length===1){ i.value=match[0]; }
-  else if(match.length>1){
-    addLine('Completions: '+match.join('  '),'info');
+function setInputCursorToEnd(i){
+  const end = i.value.length;
+  i.setSelectionRange(end, end);
+}
+
+function hidePredictions(){
+  const panel = predictionPanel();
+  if(panel) panel.hidden = true;
+}
+
+function parseInputContext(value, cursor=value.length){
+  const left = value.slice(0, cursor);
+  const tokenStart = Math.max(left.lastIndexOf(' '), left.lastIndexOf('\t')) + 1;
+  const beforeToken = value.slice(0, tokenStart);
+  const beforeTokens = beforeToken.trim().split(/\s+/).filter(Boolean);
+  return {
+    value, cursor, tokenStart, tokenEnd: cursor,
+    prefix: left.slice(tokenStart),
+    beforeTokens,
+    tokenIndex: beforeTokens.length,
+    afterCursor: value.slice(cursor),
+    left,
+  };
+}
+
+function makeSuggestion(ctx, insert, kind, detail, rank=50, opts={}){
+  const label = opts.label || insert;
+  return {
+    insert, label, kind, detail, rank,
+    start: opts.start ?? ctx.tokenStart,
+    end: opts.end ?? ctx.tokenEnd,
+    appendSpace: opts.appendSpace ?? true,
+  };
+}
+
+function addWordMatches(list, ctx, words, rankBase=20){
+  const prefix = ctx.prefix.toLowerCase();
+  words.forEach((w, idx)=>{
+    const [insert, kind, detail] = w;
+    if(!prefix || insert.toLowerCase().startsWith(prefix)){
+      list.push(makeSuggestion(ctx, insert, kind, detail, rankBase + idx));
+    }
+  });
+}
+
+function addCommandTemplateMatches(list, ctx){
+  if(ctx.afterCursor) return;
+  const typed = ctx.left.toLowerCase();
+  COMMAND_TEMPLATES.forEach(([cmd, detail], idx)=>{
+    if((!typed || cmd.toLowerCase().startsWith(typed)) && cmd !== ctx.value){
+      list.push(makeSuggestion(ctx, cmd, 'command', detail, 80 + idx, {
+        label: cmd,
+        start: 0,
+        end: ctx.value.length,
+        appendSpace: false,
+      }));
+    }
+  });
+}
+
+function branchWords(){
+  const names = uniqueWords([...Object.keys(S.branches), S.currentBranch, 'main', 'feature', 'develop', 'hotfix']);
+  return names.map(b=>[b, 'branch', b===S.currentBranch ? 'Current branch' : 'Branch name']);
+}
+
+function fileWords(){
+  const names = uniqueWords([...Object.keys(S.workTree), ...S.staged, 'README.md', 'index.html', 'src/app.js']);
+  return names.map(f=>[f, 'file', S.staged.includes(f) ? 'Staged file' : 'File path']);
+}
+
+function commitWords(){
+  const shas = Object.keys(S.commits);
+  return uniqueWords(['HEAD', 'HEAD~1', 'HEAD^', ...shas]).map(c=>[c, 'revision', c.length > 8 ? 'Commit SHA' : 'Revision']);
+}
+
+function tagWords(){
+  return uniqueWords([...Object.keys(S.tags), 'v1.0.0', 'v2.0.0']).map(t=>[t, 'tag', 'Tag name']);
+}
+
+function remoteWords(){
+  return [['origin','remote','Default remote']];
+}
+
+function stashWords(){
+  const stashes = S.stash.map((_, i)=>[`stash@{${i}}`, 'stash', 'Stash entry']);
+  return stashes.length ? stashes : [['stash@{0}', 'stash', 'Stash entry']];
+}
+
+function uniqueWords(words){
+  return [...new Set(words.filter(Boolean))];
+}
+
+function gitArgumentWords(ctx){
+  const sub = ctx.beforeTokens[1];
+  if(!sub) return [];
+  const completedArgs = ctx.beforeTokens.slice(2);
+  const optionWords = GIT_OPTION_WORDS[sub] || [];
+  let words = [];
+  if(ctx.prefix.startsWith('-')) return optionWords;
+
+  if(['switch','checkout','merge','rebase'].includes(sub)) words = words.concat(branchWords(), commitWords().slice(0, 3), optionWords);
+  else if(sub === 'branch'){
+    if(completedArgs.some(a=>['-d','-D','-m'].includes(a))) words = words.concat(branchWords());
+    else words = words.concat(optionWords, branchWords());
+  } else if(['add','restore','blame'].includes(sub)) words = words.concat(fileWords(), optionWords);
+  else if(['show','cherry-pick','revert','rev-parse','rev-list'].includes(sub)) words = words.concat(commitWords());
+  else if(sub === 'reset') words = words.concat(optionWords, commitWords());
+  else if(sub === 'tag') words = words.concat(optionWords, tagWords(), commitWords().slice(0, 2));
+  else if(sub === 'push') words = words.concat(remoteWords(), branchWords(), tagWords(), optionWords);
+  else if(['pull','fetch'].includes(sub)) words = words.concat(remoteWords(), branchWords(), optionWords);
+  else if(sub === 'remote'){
+    const action = completedArgs[0];
+    if(['remove','rm','set-url','show'].includes(action)) words = words.concat(remoteWords());
+    else words = words.concat(optionWords);
+  } else if(sub === 'stash'){
+    const action = completedArgs[0];
+    if(['apply','drop','show'].includes(action)) words = words.concat(stashWords());
+    else words = words.concat(optionWords);
+  } else if(['diff','log','config','worktree','bisect','sparse-checkout','maintenance'].includes(sub)) {
+    words = words.concat(optionWords);
   }
+  return words;
+}
+
+function shellArgumentWords(ctx){
+  const cmd = ctx.beforeTokens[0];
+  if(['cat','touch','cd'].includes(cmd)) return fileWords();
+  if(cmd === 'echo') return [['"hello" > README.md','snippet','Write to README.md']];
+  return [];
+}
+
+function getTermPredictions(value, cursor=value.length){
+  const ctx = parseInputContext(value, cursor);
+  let list = [];
+  if(ctx.tokenIndex === 0){
+    addWordMatches(list, ctx, SHELL_WORDS, 10);
+  } else if(ctx.beforeTokens[0] === 'git'){
+    if(ctx.tokenIndex === 1) addWordMatches(list, ctx, GIT_SUBCOMMAND_WORDS, 10);
+    else addWordMatches(list, ctx, gitArgumentWords(ctx), 20);
+  } else {
+    addWordMatches(list, ctx, shellArgumentWords(ctx), 20);
+  }
+  addCommandTemplateMatches(list, ctx);
+  return dedupeSuggestions(list)
+    .sort((a,b)=>a.rank-b.rank || a.label.length-b.label.length)
+    .slice(0, 8);
+}
+
+function dedupeSuggestions(list){
+  const seen = new Set();
+  return list.filter(s=>{
+    const key = `${s.start}:${s.end}:${s.insert}`;
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function updateTermPredictions(){
+  const i = inp();
+  const panel = predictionPanel();
+  if(!i || !panel || document.activeElement !== i) return;
+  S.predictions = getTermPredictions(i.value, i.selectionStart ?? i.value.length);
+  S.predictionIdx = 0;
+  if(!S.predictions.length){ panel.hidden = true; return; }
+  panel.innerHTML = '';
+  S.predictions.forEach((s, idx)=>{
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'term-prediction' + (idx === S.predictionIdx ? ' active' : '');
+    btn.innerHTML = `<span class="term-prediction-kind">${escHtml(s.kind)}</span><span class="term-prediction-main">${escHtml(s.label)}</span><span class="term-prediction-detail">${escHtml(s.detail||'Tab to complete')}</span>`;
+    btn.addEventListener('mousedown', e=>{
+      e.preventDefault();
+      applySuggestion(i, s);
+    });
+    panel.appendChild(btn);
+  });
+  panel.hidden = false;
+}
+
+function applySuggestion(i, s){
+  const value = i.value;
+  const nextChar = value.slice(s.end, s.end + 1);
+  const suffix = s.appendSpace && nextChar && !/\s/.test(nextChar) ? '' : (s.appendSpace && !/\s$/.test(s.insert) ? ' ' : '');
+  const nextValue = value.slice(0, s.start) + s.insert + suffix + value.slice(s.end);
+  const cursor = s.start + s.insert.length + suffix.length;
+  i.value = nextValue;
+  i.setSelectionRange(cursor, cursor);
+  i.focus();
+  updateTermPredictions();
+}
+
+function autoComplete(i){
+  const suggestions = getTermPredictions(i.value, i.selectionStart ?? i.value.length);
+  if(!suggestions.length){
+    addLine('No completions available.','info');
+    hidePredictions();
+    return;
+  }
+  const ctx = parseInputContext(i.value, i.selectionStart ?? i.value.length);
+  const sameWord = suggestions.filter(s=>s.start===ctx.tokenStart && s.end===ctx.tokenEnd);
+  const shared = sameWord.length > 1 ? longestCommonPrefix(sameWord.map(s=>s.insert)) : '';
+  if(shared && shared.length > ctx.prefix.length){
+    applySuggestion(i, makeSuggestion(ctx, shared, 'completion', 'Shared prefix', 1, { appendSpace:false }));
+    return;
+  }
+  applySuggestion(i, suggestions[S.predictionIdx] || suggestions[0]);
+}
+
+function longestCommonPrefix(items){
+  if(!items.length) return '';
+  return items.reduce((prefix, item)=>{
+    let i = 0;
+    while(i < prefix.length && i < item.length && prefix[i].toLowerCase() === item[i].toLowerCase()) i++;
+    return prefix.slice(0, i);
+  });
 }
 
 function initWelcome(){
@@ -1489,7 +1878,7 @@ function initWelcome(){
   addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━','output');
   addLine('Practice old & modern Git commands. Type help for all commands.','info');
   addLine('Quick start: git init → echo "hello" > README.md → git add . → git commit -m "first commit"','output');
-  addLine('Tab completion available. Arrow keys for history.','output');
+  addLine('Command predictions are live. Press Tab to accept a command or word completion. Arrow keys for history.','output');
   addLine('','output');
 }
 
@@ -1504,7 +1893,7 @@ function renderQuickCmds(){
   if(!el) return;
   el.innerHTML = QUICK.map(c=>`<button class="qcmd" onclick="injectCmd(${JSON.stringify(c)})">${c}</button>`).join('');
 }
-function injectCmd(cmd){ const i=inp(); if(i){i.value=cmd;i.focus();} }
+function injectCmd(cmd){ const i=inp(); if(i){i.value=cmd;i.focus();setInputCursorToEnd(i);updateTermPredictions();} }
 
 /* ════════════════════
    CHEAT SHEET DATA
