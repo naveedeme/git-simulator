@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GitSim">
-<link rel="manifest" href="/git-simulator/manifest.json">
-<link rel="apple-touch-icon" href="/git-simulator/icons/icon-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/git-simulator/icons/icon-512x512.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/git-simulator/icons/icon-192x192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
 <style id="embedded-fonts">
 @font-face {
   font-family: 'JetBrains Mono';
@@ -317,6 +317,60 @@ nav button.active { color: var(--orange); background: rgba(255,107,0,.1); }
 }
 .scenario-btn:hover { background: rgba(56,139,253,.2); }
 
+/* ─── GITHUB ACTIONS LESSONS ─── */
+.actions-layout { display: grid; grid-template-columns: 360px minmax(0,1fr); gap: 18px; align-items: start; }
+.actions-list {
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: calc(100vh - 150px); overflow: auto; padding-right: 4px;
+}
+.action-lesson-btn {
+  width: 100%; text-align: left; cursor: pointer;
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  border-radius: var(--radius); padding: 12px 14px;
+  transition: border-color .15s, background .15s;
+}
+.action-lesson-btn:hover { border-color: var(--blue); }
+.action-lesson-btn.active { border-color: var(--orange); background: rgba(255,107,0,.08); }
+.action-lesson-title { display: flex; gap: 8px; align-items: center; font-weight: 600; margin-bottom: 6px; }
+.action-lesson-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.action-lesson-summary { color: var(--text2); font-size: .82rem; line-height: 1.5; }
+.actions-detail {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius2); overflow: hidden;
+}
+.actions-detail-head {
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; gap: 16px; align-items: flex-start;
+}
+.actions-detail-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+.actions-detail-goal { color: var(--text2); line-height: 1.6; font-size: .92rem; }
+.actions-detail-body { padding: 18px 20px; display: grid; gap: 16px; }
+.actions-section-title {
+  color: var(--text3); font-size: .78rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px;
+}
+.actions-concepts { display: flex; flex-wrap: wrap; gap: 8px; }
+.concept-pill {
+  background: rgba(56,139,253,.09); border: 1px solid rgba(56,139,253,.22);
+  color: var(--blue2); border-radius: 999px; padding: 4px 9px; font-size: .78rem;
+}
+.workflow-code {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text2);
+  font-family: var(--mono); font-size: .78rem; line-height: 1.55;
+  padding: 14px; overflow: auto; max-height: 430px; white-space: pre;
+}
+.actions-checklist { display: grid; gap: 8px; }
+.actions-check {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+  color: var(--text2); font-size: .86rem; line-height: 1.5;
+}
+@media(max-width:920px){
+  .actions-layout { grid-template-columns: 1fr; }
+  .actions-list { max-height: none; }
+}
+
 /* ─── QUIZ ─── */
 .quiz-wrap { max-width: 680px; margin: 0 auto; }
 .quiz-question {
@@ -499,6 +553,7 @@ nav button.active { color: var(--orange); background: rgba(255,107,0,.1); }
     <button onclick="switchTab('graph',this)">🌿 Graph</button>
     <button onclick="switchTab('cheatsheet',this)">📋 Cheat Sheet</button>
     <button onclick="switchTab('scenarios',this)">🎯 Scenarios</button>
+    <button onclick="switchTab('actions',this)">⚙️ Actions</button>
     <button onclick="switchTab('quiz',this)">🧠 Quiz</button>
     <button onclick="switchTab('reference',this)">📚 Reference</button>
   </nav>
@@ -540,6 +595,11 @@ nav button.active { color: var(--orange); background: rgba(255,107,0,.1); }
         <div class="feature-icon">🎯</div>
         <div class="feature-title">Guided Scenarios</div>
         <div class="feature-desc">Step-by-step walkthroughs: merge conflicts, rebasing, cherry-pick, bisect, and more.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <div class="feature-title">GitHub Actions</div>
+        <div class="feature-desc">Learn CI/CD workflows from first YAML through deployments, releases, matrices, security, and reusable automation.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🧠</div>
@@ -627,6 +687,18 @@ nav button.active { color: var(--orange); background: rgba(255,107,0,.1); }
     <h2 style="margin-bottom:6px">Guided Scenarios</h2>
     <p style="color:var(--text2);font-size:.9rem;margin-bottom:20px">Click a scenario to load it into the terminal with step-by-step guidance.</p>
     <div class="scenario-grid" id="scenarioGrid"></div>
+  </div>
+</div>
+
+<!-- ═══ GITHUB ACTIONS ═══ -->
+<div class="tab-panel" id="tab-actions">
+  <div class="container">
+    <h2 style="margin-bottom:6px">GitHub Actions Workflows</h2>
+    <p style="color:var(--text2);font-size:.9rem;margin-bottom:20px">A complete CI/CD curriculum with workflow examples, practice tasks, and production patterns.</p>
+    <div class="actions-layout">
+      <div class="actions-list" id="actionsList"></div>
+      <div class="actions-detail" id="actionsDetail"></div>
+    </div>
   </div>
 </div>
 
@@ -1394,6 +1466,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initWelcome();
   initCheatSheet();
   initScenarios();
+  initActionLessons();
   initQuiz();
   initReference();
   renderQuickCmds();
@@ -1641,6 +1714,605 @@ function runScenario(idx){
 }
 
 /* ════════════════════
+   GITHUB ACTIONS LESSONS
+═══════════════════════ */
+const ACTION_LESSONS = [
+  {
+    icon:'🧭', track:'Foundations', level:'Beginner', title:'Workflow Anatomy',
+    summary:'Understand where workflows live and how YAML maps to events, jobs, runners, and steps.',
+    goal:'Build the mental model for every GitHub Actions workflow: a file in .github/workflows, one or more triggers, jobs that run on virtual machines, and ordered steps that execute shell commands or actions.',
+    concepts:['.github/workflows/*.yml','name','on','jobs','runs-on','steps','uses vs run','indentation'],
+    workflow:[
+      'name: First Workflow',
+      '',
+      'on:',
+      '  workflow_dispatch:',
+      '',
+      'jobs:',
+      '  hello:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - name: Say hello',
+      '        run: echo "Hello from GitHub Actions"',
+      '      - name: Show runner',
+      '        run: uname -a',
+    ],
+    practice:['Create .github/workflows/first.yml.','Run it manually from the Actions tab.','Add one more step that prints the current directory with pwd.']
+  },
+  {
+    icon:'🎯', track:'Foundations', level:'Beginner', title:'Events and Filters',
+    summary:'Choose the right trigger for pushes, pull requests, tags, schedules, and manual runs.',
+    goal:'Learn how workflow triggers decide when automation runs, and how branch, tag, and path filters keep workflows focused and cost-efficient.',
+    concepts:['push','pull_request','workflow_dispatch','schedule','branches','tags','paths','paths-ignore'],
+    workflow:[
+      'name: Filtered CI',
+      '',
+      'on:',
+      '  push:',
+      '    branches: [main]',
+      '    paths:',
+      '      - "src/**"',
+      '      - "package-lock.json"',
+      '  pull_request:',
+      '    branches: [main]',
+      '  workflow_dispatch:',
+      '  schedule:',
+      '    - cron: "15 3 * * 1"',
+      '',
+      'jobs:',
+      '  explain-event:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - run: echo "Triggered by ${{ github.event_name }}"',
+    ],
+    practice:['Add a tag trigger for v* release tags.','Add paths-ignore for docs-only changes.','Explain when push and pull_request both run.']
+  },
+  {
+    icon:'🧪', track:'CI', level:'Beginner', title:'Node.js CI',
+    summary:'Install dependencies, run linting, execute tests, and build a JavaScript project.',
+    goal:'Write a reliable pull request workflow for Node.js projects with checkout, setup-node, dependency caching, lint, test, and build stages.',
+    concepts:['actions/checkout','actions/setup-node','npm ci','lint','test','build','dependency cache'],
+    workflow:[
+      'name: Node CI',
+      '',
+      'on:',
+      '  pull_request:',
+      '  push:',
+      '    branches: [main]',
+      '',
+      'jobs:',
+      '  test:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-node@v4',
+      '        with:',
+      '          node-version: 22',
+      '          cache: npm',
+      '      - run: npm ci',
+      '      - run: npm run lint --if-present',
+      '      - run: npm test --if-present',
+      '      - run: npm run build --if-present',
+    ],
+    practice:['Switch node-version to 20 and compare results.','Add npm audit --audit-level=high.','Make build run only when package.json has a build script.']
+  },
+  {
+    icon:'🐍', track:'CI', level:'Beginner', title:'Python CI',
+    summary:'Run formatting, linting, and tests for Python packages.',
+    goal:'Create a Python CI workflow that installs dependencies, checks style, and runs a test suite with pytest.',
+    concepts:['setup-python','pip cache','requirements.txt','ruff','pytest','working-directory'],
+    workflow:[
+      'name: Python CI',
+      '',
+      'on: [push, pull_request]',
+      '',
+      'jobs:',
+      '  test:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-python@v5',
+      '        with:',
+      '          python-version: "3.12"',
+      '          cache: pip',
+      '      - run: python -m pip install --upgrade pip',
+      '      - run: pip install -r requirements.txt',
+      '      - run: pip install ruff pytest',
+      '      - run: ruff check .',
+      '      - run: pytest -q',
+    ],
+    practice:['Add a second job for type checking with mypy.','Cache pip based on requirements.txt.','Upload pytest results as an artifact.']
+  },
+  {
+    icon:'☕', track:'CI', level:'Intermediate', title:'Java, Maven, and Gradle',
+    summary:'Build JVM projects with dependency caching and test reports.',
+    goal:'Use setup-java to prepare a JDK, cache Maven or Gradle dependencies, and publish test results for review.',
+    concepts:['setup-java','Temurin','Maven','Gradle','test reports','artifacts'],
+    workflow:[
+      'name: Java CI',
+      '',
+      'on: [push, pull_request]',
+      '',
+      'jobs:',
+      '  maven:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-java@v4',
+      '        with:',
+      '          distribution: temurin',
+      '          java-version: "21"',
+      '          cache: maven',
+      '      - run: mvn -B verify',
+      '      - uses: actions/upload-artifact@v4',
+      '        if: always()',
+      '        with:',
+      '          name: surefire-reports',
+      '          path: target/surefire-reports/',
+    ],
+    practice:['Convert the job to Gradle using cache: gradle.','Make test report upload run even on failure.','Add a separate package job after tests pass.']
+  },
+  {
+    icon:'🧩', track:'CI', level:'Intermediate', title:'Matrix Testing',
+    summary:'Run one workflow across multiple OS, language, or dependency versions.',
+    goal:'Use strategy.matrix to test compatibility quickly without copying whole jobs.',
+    concepts:['strategy.matrix','fail-fast','include','exclude','matrix variables','multi-OS'],
+    workflow:[
+      'name: Matrix CI',
+      '',
+      'on: [push, pull_request]',
+      '',
+      'jobs:',
+      '  test:',
+      '    runs-on: ${{ matrix.os }}',
+      '    strategy:',
+      '      fail-fast: false',
+      '      matrix:',
+      '        os: [ubuntu-latest, windows-latest, macos-latest]',
+      '        node: [20, 22]',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-node@v4',
+      '        with:',
+      '          node-version: ${{ matrix.node }}',
+      '          cache: npm',
+      '      - run: npm ci',
+      '      - run: npm test --if-present',
+    ],
+    practice:['Exclude Windows with Node 20.','Add an experimental Node version with continue-on-error.','Name each job using matrix values.']
+  },
+  {
+    icon:'📦', track:'CI', level:'Intermediate', title:'Artifacts and Build Outputs',
+    summary:'Store logs, coverage, screenshots, packages, and compiled assets.',
+    goal:'Persist outputs from one workflow run so reviewers can inspect them or downstream jobs can download them.',
+    concepts:['upload-artifact','download-artifact','retention-days','coverage','screenshots','build outputs'],
+    workflow:[
+      'name: Build Artifacts',
+      '',
+      'on: [push, pull_request]',
+      '',
+      'jobs:',
+      '  build:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-node@v4',
+      '        with:',
+      '          node-version: 22',
+      '          cache: npm',
+      '      - run: npm ci',
+      '      - run: npm run build --if-present',
+      '      - uses: actions/upload-artifact@v4',
+      '        with:',
+      '          name: web-build',
+      '          path: dist/',
+      '          retention-days: 7',
+    ],
+    practice:['Upload coverage only if the folder exists.','Download the artifact in a second job.','Set retention-days based on project needs.']
+  },
+  {
+    icon:'🔐', track:'Security', level:'Intermediate', title:'Secrets, Variables, and Environments',
+    summary:'Use secrets safely and separate configuration from code.',
+    goal:'Pass private values to jobs without printing them, and use environments for deployment approvals and environment-scoped secrets.',
+    concepts:['secrets','vars','env','environment','masked logs','approval gates'],
+    workflow:[
+      'name: Deploy with Secrets',
+      '',
+      'on:',
+      '  workflow_dispatch:',
+      '',
+      'jobs:',
+      '  deploy:',
+      '    runs-on: ubuntu-latest',
+      '    environment: production',
+      '    env:',
+      '      APP_ENV: ${{ vars.APP_ENV }}',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - name: Deploy',
+      '        run: ./scripts/deploy.sh',
+      '        env:',
+      '          API_TOKEN: ${{ secrets.PRODUCTION_API_TOKEN }}',
+    ],
+    practice:['Create staging and production environments.','Move a non-secret URL into repository variables.','Confirm secrets do not appear in logs.']
+  },
+  {
+    icon:'🛡️', track:'Security', level:'Advanced', title:'Permissions and Least Privilege',
+    summary:'Reduce token permissions and protect workflows from unnecessary write access.',
+    goal:'Control the default GITHUB_TOKEN permissions so each workflow has only the access it needs.',
+    concepts:['permissions','GITHUB_TOKEN','contents: read','pull-requests: write','id-token: write','least privilege'],
+    workflow:[
+      'name: Secure PR Checks',
+      '',
+      'on:',
+      '  pull_request:',
+      '',
+      'permissions:',
+      '  contents: read',
+      '  pull-requests: write',
+      '',
+      'jobs:',
+      '  review:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - run: npm ci',
+      '      - run: npm test --if-present',
+      '      - name: Comment summary',
+      '        run: echo "Use a reviewed action or gh CLI here"',
+    ],
+    practice:['Remove pull-requests: write and observe what breaks.','Set permissions: {} for jobs that need no token.','Pin third-party actions by SHA for high-risk workflows.']
+  },
+  {
+    icon:'🚀', track:'CD', level:'Intermediate', title:'GitHub Pages Deployment',
+    summary:'Deploy a static site with the official Pages artifact flow.',
+    goal:'Publish static HTML, CSS, and JavaScript from GitHub Actions to GitHub Pages using the current supported actions.',
+    concepts:['configure-pages','upload-pages-artifact','deploy-pages','pages permission','id-token permission','environment URL'],
+    workflow:[
+      'name: Deploy Pages',
+      '',
+      'on:',
+      '  push:',
+      '    branches: [main]',
+      '  workflow_dispatch:',
+      '',
+      'permissions:',
+      '  contents: read',
+      '  pages: write',
+      '  id-token: write',
+      '',
+      'jobs:',
+      '  deploy:',
+      '    environment:',
+      '      name: github-pages',
+      '      url: ${{ steps.deployment.outputs.page_url }}',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/configure-pages@v5',
+      '      - uses: actions/upload-pages-artifact@v3',
+      '        with:',
+      '          path: "."',
+      '      - id: deployment',
+      '        uses: actions/deploy-pages@v4',
+    ],
+    practice:['Deploy only after a build job succeeds.','Change path to dist for a built frontend.','Add concurrency to avoid overlapping Pages deployments.']
+  },
+  {
+    icon:'🐳', track:'CD', level:'Advanced', title:'Docker Build and Registry Push',
+    summary:'Build images, tag them, cache layers, and push to GHCR.',
+    goal:'Create a container release workflow that authenticates to GitHub Container Registry and publishes reproducible tags.',
+    concepts:['docker/login-action','build-push-action','GHCR','tags','labels','layer cache','packages permission'],
+    workflow:[
+      'name: Docker Publish',
+      '',
+      'on:',
+      '  push:',
+      '    tags: ["v*"]',
+      '',
+      'permissions:',
+      '  contents: read',
+      '  packages: write',
+      '',
+      'jobs:',
+      '  image:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: docker/login-action@v3',
+      '        with:',
+      '          registry: ghcr.io',
+      '          username: ${{ github.actor }}',
+      '          password: ${{ secrets.GITHUB_TOKEN }}',
+      '      - uses: docker/build-push-action@v6',
+      '        with:',
+      '          context: .',
+      '          push: true',
+      '          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}',
+    ],
+    practice:['Add a latest tag only for stable releases.','Use cache-from and cache-to with gha cache.','Add image labels for source and revision.']
+  },
+  {
+    icon:'🏷️', track:'CD', level:'Intermediate', title:'Release Automation',
+    summary:'Create GitHub releases and upload packaged artifacts from tags.',
+    goal:'Package versioned outputs and attach them to a GitHub Release when a release tag is pushed.',
+    concepts:['tags','softprops/action-gh-release','release notes','assets','contents: write'],
+    workflow:[
+      'name: Release',
+      '',
+      'on:',
+      '  push:',
+      '    tags: ["v*"]',
+      '',
+      'permissions:',
+      '  contents: write',
+      '',
+      'jobs:',
+      '  release:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - run: zip -r app.zip . -x ".git/*"',
+      '      - uses: softprops/action-gh-release@v2',
+      '        with:',
+      '          files: app.zip',
+      '          generate_release_notes: true',
+    ],
+    practice:['Create a prerelease for tags ending in -rc.','Attach multiple platform artifacts.','Add changelog text from CHANGELOG.md.']
+  },
+  {
+    icon:'☁️', track:'CD', level:'Advanced', title:'Cloud Deploy with OIDC',
+    summary:'Deploy to cloud providers without long-lived cloud keys.',
+    goal:'Use GitHub OIDC and id-token permissions so the workflow exchanges a short-lived token with your cloud provider.',
+    concepts:['OIDC','id-token: write','role assumption','short-lived credentials','cloud trust policy'],
+    workflow:[
+      'name: Cloud Deploy',
+      '',
+      'on:',
+      '  workflow_dispatch:',
+      '',
+      'permissions:',
+      '  contents: read',
+      '  id-token: write',
+      '',
+      'jobs:',
+      '  deploy:',
+      '    runs-on: ubuntu-latest',
+      '    environment: production',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - name: Configure cloud credentials',
+      '        run: echo "Use the official cloud login action here"',
+      '      - name: Deploy',
+      '        run: ./scripts/deploy.sh',
+    ],
+    practice:['Create a cloud role trusted only by this repo and branch.','Restrict deployment to a protected environment.','Remove old static cloud keys from repository secrets.']
+  },
+  {
+    icon:'♻️', track:'Reuse', level:'Advanced', title:'Reusable Workflows',
+    summary:'Share complete workflows across repositories or jobs.',
+    goal:'Use workflow_call to define a reusable CI pipeline and call it with inputs and secrets.',
+    concepts:['workflow_call','inputs','secrets: inherit','uses: owner/repo/.github/workflows/file.yml@ref','standardization'],
+    workflow:[
+      'name: Reusable Node CI',
+      '',
+      'on:',
+      '  workflow_call:',
+      '    inputs:',
+      '      node-version:',
+      '        required: true',
+      '        type: string',
+      '',
+      'jobs:',
+      '  test:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-node@v4',
+      '        with:',
+      '          node-version: ${{ inputs.node-version }}',
+      '          cache: npm',
+      '      - run: npm ci',
+      '      - run: npm test --if-present',
+    ],
+    practice:['Call this workflow from another workflow with node-version: 22.','Add an input for working-directory.','Decide when reusable workflows are better than composite actions.']
+  },
+  {
+    icon:'🧱', track:'Reuse', level:'Advanced', title:'Composite Actions',
+    summary:'Package repeated step logic as a local or shared action.',
+    goal:'Create an action.yml that bundles setup commands into a reusable action for many workflows.',
+    concepts:['action.yml','runs.using: composite','inputs','outputs','local actions','step reuse'],
+    workflow:[
+      'name: Use Composite Action',
+      '',
+      'on: [push]',
+      '',
+      'jobs:',
+      '  test:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: ./.github/actions/setup-project',
+      '        with:',
+      '          node-version: 22',
+      '      - run: npm test --if-present',
+    ],
+    practice:['Create .github/actions/setup-project/action.yml.','Move checkout-independent setup steps into the action.','Add an output such as cache-hit or version.']
+  },
+  {
+    icon:'🏗️', track:'Patterns', level:'Intermediate', title:'Monorepo Workflows',
+    summary:'Run only the jobs affected by path changes in large repositories.',
+    goal:'Design CI that scales in monorepos by filtering app-specific changes and giving each package a focused job.',
+    concepts:['paths filters','working-directory','changed files','job outputs','package isolation'],
+    workflow:[
+      'name: Monorepo CI',
+      '',
+      'on:',
+      '  pull_request:',
+      '    paths:',
+      '      - "apps/web/**"',
+      '      - "packages/shared/**"',
+      '',
+      'jobs:',
+      '  web:',
+      '    runs-on: ubuntu-latest',
+      '    defaults:',
+      '      run:',
+      '        working-directory: apps/web',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - uses: actions/setup-node@v4',
+      '        with:',
+      '          node-version: 22',
+      '          cache: npm',
+      '          cache-dependency-path: apps/web/package-lock.json',
+      '      - run: npm ci',
+      '      - run: npm test --if-present',
+    ],
+    practice:['Add a separate API job for apps/api.','Share package changes with both web and api jobs.','Add a docs-only path that skips app CI.']
+  },
+  {
+    icon:'⏱️', track:'Operations', level:'Intermediate', title:'Scheduled and Maintenance Workflows',
+    summary:'Run recurring jobs for dependency checks, backups, reports, and cleanup.',
+    goal:'Use cron schedules safely, keep manual dispatch available, and prevent maintenance jobs from overlapping.',
+    concepts:['schedule','cron UTC','workflow_dispatch','concurrency','timeouts','nightly jobs'],
+    workflow:[
+      'name: Nightly Maintenance',
+      '',
+      'on:',
+      '  schedule:',
+      '    - cron: "0 2 * * *"',
+      '  workflow_dispatch:',
+      '',
+      'concurrency:',
+      '  group: nightly-maintenance',
+      '  cancel-in-progress: true',
+      '',
+      'jobs:',
+      '  audit:',
+      '    runs-on: ubuntu-latest',
+      '    timeout-minutes: 20',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - run: npm audit --audit-level=high',
+    ],
+    practice:['Remember schedules use UTC.','Add dependency review or license checks.','Make the workflow create an issue when maintenance fails.']
+  },
+  {
+    icon:'🚦', track:'Operations', level:'Advanced', title:'Concurrency, Needs, and Gates',
+    summary:'Coordinate multi-job pipelines and cancel stale runs.',
+    goal:'Use needs for job ordering, if conditions for gates, and concurrency to avoid overlapping deployments.',
+    concepts:['needs','if','concurrency','cancel-in-progress','success()','always()','deployment gates'],
+    workflow:[
+      'name: Gated Pipeline',
+      '',
+      'on:',
+      '  push:',
+      '    branches: [main]',
+      '',
+      'concurrency:',
+      '  group: deploy-${{ github.ref }}',
+      '  cancel-in-progress: true',
+      '',
+      'jobs:',
+      '  test:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - run: npm test --if-present',
+      '',
+      '  deploy:',
+      '    needs: test',
+      '    if: success()',
+      '    runs-on: ubuntu-latest',
+      '    environment: production',
+      '    steps:',
+      '      - run: echo "Deploy only after tests pass"',
+    ],
+    practice:['Add a build job between test and deploy.','Upload logs with if: always().','Make staging deploy on every main push and production manual.']
+  },
+  {
+    icon:'🔎', track:'Operations', level:'Intermediate', title:'Debugging Failed Workflows',
+    summary:'Read logs, reproduce locally, add summaries, and keep failures actionable.',
+    goal:'Make workflows easier to troubleshoot with grouped logs, step summaries, artifacted reports, and minimal reproduction steps.',
+    concepts:['step logs','ACTIONS_STEP_DEBUG','GITHUB_STEP_SUMMARY','if: failure()','artifacts','rerun failed jobs'],
+    workflow:[
+      'name: Debuggable CI',
+      '',
+      'on: [pull_request]',
+      '',
+      'jobs:',
+      '  test:',
+      '    runs-on: ubuntu-latest',
+      '    steps:',
+      '      - uses: actions/checkout@v4',
+      '      - run: echo "::group::Install" && npm ci && echo "::endgroup::"',
+      '      - run: npm test --if-present',
+      '      - name: Write summary',
+      '        if: always()',
+      '        run: echo "### CI finished for ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY',
+      '      - uses: actions/upload-artifact@v4',
+      '        if: failure()',
+      '        with:',
+      '          name: failure-logs',
+      '          path: logs/',
+    ],
+    practice:['Turn on step debug from repository secrets.','Add a summary table with test status.','Upload Playwright screenshots only on failure.']
+  },
+];
+
+let selectedActionLesson = 0;
+
+function initActionLessons(){
+  renderActionLessons();
+  openActionLesson(0);
+}
+
+function renderActionLessons(){
+  const list=document.getElementById('actionsList');
+  if(!list) return;
+  list.innerHTML=ACTION_LESSONS.map((l,i)=>`
+    <button class="action-lesson-btn ${i===selectedActionLesson?'active':''}" onclick="openActionLesson(${i})">
+      <div class="action-lesson-title"><span>${l.icon}</span><span>${escHtml(l.title)}</span></div>
+      <div class="action-lesson-meta">
+        <span class="tag">${escHtml(l.track)}</span>
+        <span class="tag">${escHtml(l.level)}</span>
+      </div>
+      <div class="action-lesson-summary">${escHtml(l.summary)}</div>
+    </button>`).join('');
+}
+
+function openActionLesson(idx){
+  selectedActionLesson=idx;
+  renderActionLessons();
+  const l=ACTION_LESSONS[idx];
+  const detail=document.getElementById('actionsDetail');
+  if(!detail||!l) return;
+  detail.innerHTML=`
+    <div class="actions-detail-head">
+      <div>
+        <div class="actions-detail-title">${l.icon} ${escHtml(l.title)}</div>
+        <div class="actions-detail-goal">${escHtml(l.goal)}</div>
+      </div>
+      <span class="tag">${escHtml(l.track)} · ${escHtml(l.level)}</span>
+    </div>
+    <div class="actions-detail-body">
+      <div>
+        <div class="actions-section-title">Concepts</div>
+        <div class="actions-concepts">${l.concepts.map(c=>`<span class="concept-pill">${escHtml(c)}</span>`).join('')}</div>
+      </div>
+      <div>
+        <div class="actions-section-title">Workflow Example</div>
+        <pre class="workflow-code"><code>${escHtml(l.workflow.join('\n'))}</code></pre>
+      </div>
+      <div>
+        <div class="actions-section-title">Practice</div>
+        <div class="actions-checklist">${l.practice.map((p,i)=>`<div class="actions-check">${i+1}. ${escHtml(p)}</div>`).join('')}</div>
+      </div>
+    </div>`;
+}
+
+/* ════════════════════
    QUIZ
 ═══════════════════════ */
 const QUESTIONS = [
@@ -1839,10 +2511,18 @@ let deferredPrompt;
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault();
   deferredPrompt=e;
-  document.getElementById('installBtn').classList.add('show');
+  const btn=document.getElementById('installBtn');
+  if(btn){
+    btn.textContent='⬇ Install';
+    btn.title='Install Git Simulator as an app';
+    btn.classList.add('show');
+  }
 });
 document.getElementById('installBtn')?.addEventListener('click', async()=>{
-  if(!deferredPrompt) return;
+  if(!deferredPrompt){
+    toast('If your browser supports PWA installation, use the address bar install icon or browser menu.','info');
+    return;
+  }
   deferredPrompt.prompt();
   const {outcome}=await deferredPrompt.userChoice;
   if(outcome==='accepted'){ toast('App installed! 🎉','success'); }
@@ -1853,7 +2533,7 @@ window.addEventListener('appinstalled',()=>toast('Git Simulator installed succes
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/git-simulator/sw.js', {scope: '/git-simulator/'})
+    navigator.serviceWorker.register('sw.js', {scope: './'})
       .then(r => console.log('SW ok, scope:', r.scope))
       .catch(e => console.warn('SW error:', e));
   });
@@ -1881,7 +2561,8 @@ window.addEventListener('resize',()=>refreshGraph());
 document.addEventListener('keydown',e=>{
   if(e.ctrlKey&&e.key==='1') switchTab('terminal',document.querySelectorAll('nav button')[1]);
   if(e.ctrlKey&&e.key==='2') switchTab('cheatsheet',document.querySelectorAll('nav button')[3]);
-  if(e.ctrlKey&&e.key==='3') switchTab('quiz',document.querySelectorAll('nav button')[5]);
+  if(e.ctrlKey&&e.key==='3') switchTab('quiz',document.querySelectorAll('nav button')[6]);
+  if(e.ctrlKey&&e.key==='4') switchTab('actions',document.querySelectorAll('nav button')[5]);
 });
 </script>
 </body>

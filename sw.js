@@ -1,5 +1,5 @@
-const CACHE = 'gitsim-v3';
-const BASE  = '/git-simulator';
+const CACHE = 'gitsim-v4';
+const BASE  = new URL('./', self.location).pathname.replace(/\/$/, '');
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -7,10 +7,10 @@ self.addEventListener('install', e => {
     caches.open(CACHE).then(c => c.addAll([
       BASE + '/index.html',
       BASE + '/manifest.json',
-      BASE + '/icons/icon-192x192.png',
-      BASE + '/icons/icon-192x192-maskable.png',
-      BASE + '/icons/icon-512x512.png',
-      BASE + '/icons/icon-512x512-maskable.png',
+      BASE + '/icon-192x192.png',
+      BASE + '/icon-192x192-maskable.png',
+      BASE + '/icon-512x512.png',
+      BASE + '/icon-512x512-maskable.png',
     ]))
   );
 });
@@ -26,6 +26,8 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const requestUrl = new URL(e.request.url);
+  if (requestUrl.origin !== self.location.origin || !requestUrl.pathname.startsWith(BASE || '/')) return;
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
       if (res.ok) {

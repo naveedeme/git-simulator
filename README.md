@@ -14,6 +14,7 @@
 | 🌿 Live Branch Graph | Animated canvas showing commits and branches as you work |
 | 📋 Cheat Sheet | 9 categories, 70+ commands — old vs new (Git 2.x) syntax side by side |
 | 🎯 Guided Scenarios | 12 real-world walkthroughs (hotfix, rebase, worktree, sparse-checkout…) |
+| ⚙️ GitHub Actions | Complete workflow curriculum for CI/CD, Pages, Docker, releases, security, and reusable automation |
 | 🧠 Knowledge Quiz | 18 context-rich questions with explanations, randomized each round |
 | 📚 Full Reference | Searchable table of all commands with old→new mapping |
 | 📶 Fully Offline PWA | Install to home screen, works without internet, no sign-up |
@@ -100,15 +101,16 @@ git-simulator/
 ├── index.html              # Main PWA app (single file)
 ├── manifest.json           # PWA manifest
 ├── sw.js                   # Service worker (offline cache)
-├── icons/
-│   ├── icon-72x72.png
-│   ├── icon-96x96.png
-│   ├── icon-128x128.png
-│   ├── icon-144x144.png
-│   ├── icon-152x152.png
-│   ├── icon-192x192.png
-│   ├── icon-384x384.png
-│   └── icon-512x512.png
+├── icon-72x72.png
+├── icon-96x96.png
+├── icon-128x128.png
+├── icon-144x144.png
+├── icon-152x152.png
+├── icon-192x192.png
+├── icon-192x192-maskable.png
+├── icon-384x384.png
+├── icon-512x512.png
+├── icon-512x512-maskable.png
 └── .github/
     └── workflows/
         └── deploy.yml      # GitHub Pages CI/CD
@@ -123,6 +125,7 @@ git-simulator/
 | `Ctrl+1` | Jump to Terminal |
 | `Ctrl+2` | Jump to Cheat Sheet |
 | `Ctrl+3` | Jump to Quiz |
+| `Ctrl+4` | Jump to GitHub Actions |
 | `↑ / ↓` | Command history in terminal |
 | `Tab` | Autocomplete git commands |
 
